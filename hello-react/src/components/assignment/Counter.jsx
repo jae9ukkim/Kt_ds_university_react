@@ -1,12 +1,31 @@
-export const Counter = () => {
+import { useState } from "react";
+
+const Counter = () => {
   const MIN_VAL = 0;
   const MAX_VAL = 100;
-  const count = 0;
+  const [counter, setCounter] = useState(0);
+
+  const onIncreaseCounterHandler = () => {
+    if (counter >= MAX_VAL) {
+      return;
+    }
+    setCounter(counter + 1);
+  };
+
+  const onDecreaseCounterHandler = () => {
+    if (counter <= MIN_VAL) {
+      return;
+    }
+    setCounter(counter - 1);
+  };
+
   return (
-    <div className="wrapper">
-      <button>-</button>
-      <div></div>
-      <button>+</button>
+    <div className="wrapper counter">
+      <button onClick={onDecreaseCounterHandler}>-</button>
+      <div>{counter}</div>
+      <button onClick={onIncreaseCounterHandler}>+</button>
     </div>
   );
 };
+
+export default Counter;
