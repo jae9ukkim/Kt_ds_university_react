@@ -9,6 +9,7 @@ const TodoList = ({ todoData, onDoneChange }) => {
     <>
       {todoData.map((todo) => (
         <TodoItem
+          key={todo.id}
           priorities={priorities}
           todo={todo}
           onDoneChange={onDoneChange}

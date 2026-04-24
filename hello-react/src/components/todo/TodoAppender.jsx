@@ -1,5 +1,6 @@
 // 함수 props로 받아올 때는 handler 붙이지 않는 것이 관례
 const TodoAppender = ({
+  inputData: { todo, dueDate, priority },
   onTaskKeyUp,
   onDateChange,
   onPrioritySelectChange,
@@ -7,9 +8,14 @@ const TodoAppender = ({
 }) => {
   return (
     <footer>
-      <input type="text" placeholder="Input new task" onKeyUp={onTaskKeyUp} />
-      <input type="date" onChange={onDateChange} />
-      <select onChange={onPrioritySelectChange}>
+      <input
+        type="text"
+        placeholder="Input new task"
+        value={todo}
+        onChange={onTaskKeyUp}
+      />
+      <input type="date" value={dueDate} onChange={onDateChange} />
+      <select value={priority} onChange={onPrioritySelectChange}>
         <option>우선순위</option>
         <option value="1">높음</option>
         <option value="2">보통</option>

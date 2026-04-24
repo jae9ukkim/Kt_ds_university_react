@@ -1,44 +1,77 @@
 import { useState } from "react";
 
 const Calc = () => {
-  const [firstNum, setFirstNum] = useState(0);
-  const [secondNum, setSecondNum] = useState(0);
-  const [calcResult, setCalc] = useState(0);
+  // const [firstNum, setFirstNum] = useState(0);
+  // const [secondNum, setSecondNum] = useState(0);
+  // const [resultNum, setCalc] = useState(0);
+  const [{ firstNum, secondNum, resultNum }, setNums] = useState({
+    firstNum: 10,
+    secondNum: 20,
+    resultNum: 30,
+  });
 
   const onFirstNumberChangeHandler = (event) => {
-    setFirstNum(parseFloat(event.target.value));
+    // setFirstNum(parseFloat(event.target.value));
+    setNums((prevNums) => {
+      const newNums = { ...prevNums, firstNum: parseFloat(event.target.value) };
+      return newNums;
+    });
   };
 
   const onSecondNumberChangeHandler = (event) => {
-    setSecondNum(parseFloat(event.target.value));
+    // setSecondNum(parseFloat(event.target.value));
+    setNums((prevNums) => {
+      const newNums = {
+        ...prevNums,
+        secondNum: parseFloat(event.target.value),
+      };
+      return newNums;
+    });
   };
 
-  const onAddButtonHandler = () => {
-    // console.log(typeof firstNum);
-    // console.log(typeof secondNum);
-    setCalc(firstNum + secondNum);
-  };
-  const onSubtractButtonHandler = () => {
-    setCalc(firstNum - secondNum);
-  };
-  const onMultiplyButtonHandler = () => {
-    setCalc(firstNum * secondNum);
-  };
-  const onDivideButtonHandler = () => {
-    setCalc(firstNum / secondNum);
+  const onCalcButtonClickHandler = (operator) => {
+    // console.log(event, operator);
+    let resultNum = 0;
+
+    if (operator === "+") {
+      // setCalc(firstNum + secondNum);
+      resultNum = firstNum + secondNum;
+    } else if (operator === "-") {
+      // setCalc(firstNum - secondNum);
+      resultNum = firstNum - secondNum;
+    } else if (operator === "*") {
+      // setCalc(firstNum * secondNum);
+      resultNum = firstNum * secondNum;
+    } else if (operator === "/") {
+      // setCalc(firstNum / secondNum);
+      resultNum = firstNum / secondNum;
+    }
+
+    setNums((prevNums) => {
+      const newNums = { ...prevNums, resultNum };
+      return newNums;
+    });
   };
 
   return (
     <div className="wrapper calc">
-      <input type="number" onChange={onFirstNumberChangeHandler} />
+      <input
+        type="number"
+        onChange={onFirstNumberChangeHandler}
+        value={firstNum}
+      />
       <div className="operator">
-        <button onClick={onAddButtonHandler}>+</button>
-        <button onClick={onSubtractButtonHandler}>-</button>
-        <button onClick={onMultiplyButtonHandler}>*</button>
-        <button onClick={onDivideButtonHandler}>/</button>
+        <button onClick={onCalcButtonClickHandler.bind(this, "+")}>+</button>
+        <button onClick={onCalcButtonClickHandler.bind(this, "-")}>-</button>
+        <button onClick={onCalcButtonClickHandler.bind(this, "*")}>*</button>
+        <button onClick={onCalcButtonClickHandler.bind(this, "/")}>/</button>
       </div>
-      <input type="number" onChange={onSecondNumberChangeHandler} />=
-      <div className="result">{calcResult}</div>
+      <input
+        type="number"
+        onChange={onSecondNumberChangeHandler}
+        value={secondNum}
+      />
+      =<div className="result">{resultNum}</div>
     </div>
   );
 };

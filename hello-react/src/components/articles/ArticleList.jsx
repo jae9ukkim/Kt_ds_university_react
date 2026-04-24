@@ -2,7 +2,7 @@ const ArticleList = ({ articles }) => {
   return (
     <tbody>
       {articles.map((article) => (
-        <tr>
+        <tr key={article.id}>
           <td>{article.id}</td>
           <td>
             <a href="">{article.subject}</a>

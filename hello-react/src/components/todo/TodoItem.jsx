@@ -6,7 +6,7 @@ const TodoItem = ({ todo, priorities, onDoneChange }) => {
   const doneClass = todo.isDone ? "done" : "";
 
   const onDoneChangeHandler = () => {
-    onDoneChange(id);
+    onDoneChange(id, !todo.isDone);
   };
 
   return (
