@@ -77,14 +77,18 @@ const ArticleMain = () => {
     });
   };
   // console.log(articleData);
-  return (
-    <div className="wrapper">
-      <div> {articles.length}개의 게시글이 검색되었습니다.</div>
-      <table>
-        <ArticleHeader />
-        <ArticleList articles={articles} />
-      </table>
-      <div>
+  const [isWriteFormActive, setIsWriteFormActive] = useState(false);
+
+  const onChangeWriteFormHandler = () => {
+    setIsWriteFormActive((isActive) => {
+      return !isActive;
+    });
+  };
+
+  const writeForm =
+    (!isWriteFormActive && <button>글쓰기</button>) ||
+    (isWriteFormActive && (
+      <>
         <ArticleWriter
           onSaveButtonClick={onSaveButtonClickHandler}
           onChangeSubject={onChangeSubjectHandler}
@@ -93,7 +97,16 @@ const ArticleMain = () => {
           onChangeContent={onChangeContentHandler}
           inputData={{ subject, email, name, content }}
         />
-      </div>
+      </>
+    ));
+  return (
+    <div className="wrapper">
+      <div> {articles.length}개의 게시글이 검색되었습니다.</div>
+      <table>
+        <ArticleHeader />
+        <ArticleList articles={articles} />
+      </table>
+      <div>{writeForm}</div>
     </div>
   );
 };
