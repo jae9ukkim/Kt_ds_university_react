@@ -79,14 +79,16 @@ const ArticleMain = () => {
   // console.log(articleData);
   const [isWriteFormActive, setIsWriteFormActive] = useState(false);
 
-  const onChangeWriteFormHandler = () => {
+  const onClickWriteFormToggleHandler = () => {
     setIsWriteFormActive((isActive) => {
       return !isActive;
     });
   };
 
   const writeForm =
-    (!isWriteFormActive && <button>글쓰기</button>) ||
+    (!isWriteFormActive && (
+      <button onClick={onClickWriteFormToggleHandler}>글쓰기</button>
+    )) ||
     (isWriteFormActive && (
       <>
         <ArticleWriter
@@ -95,6 +97,7 @@ const ArticleMain = () => {
           onChangeEmail={onChangeEmailHandler}
           onChangeName={onChangeNameHandler}
           onChangeContent={onChangeContentHandler}
+          onClickWriterFormToggle={onClickWriteFormToggleHandler}
           inputData={{ subject, email, name, content }}
         />
       </>

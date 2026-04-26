@@ -4,6 +4,7 @@ const ArticleWriter = ({
   onChangeEmail,
   onChangeName,
   onChangeContent,
+  onClickWriterFormToggle,
   inputData: { subject, email, name, content },
 }) => {
   return (
@@ -49,6 +50,7 @@ const ArticleWriter = ({
         />
       </div>
       <input type="button" value="전송" onClick={onSaveButtonClick} />
+      <input type="button" value="취소" onClick={onClickWriterFormToggle} />
     </form>
   );
 };
