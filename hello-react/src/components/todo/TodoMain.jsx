@@ -44,11 +44,6 @@ const TodoMain = () => {
   ];
 
   const [cachedData, setCachedData] = useState(todoData);
-  const [{ todo, dueDate, priority }, setNewTodoData] = useState({
-    todo: "",
-    dueDate: "",
-    priority: 0,
-  });
 
   const isAllDoneChangeHandler = (isDone) => {
     setCachedData((prevData) => {
@@ -79,41 +74,20 @@ const TodoMain = () => {
     });
   };
 
-  const onTaskKeyUpHandler = (event) => {
-    console.log(event.target.value);
-    setNewTodoData((prevData) => ({ ...prevData, todo: event.target.value }));
-  };
-
-  const onDateChangeHandler = (event) => {
-    console.log(event.target.value);
-    setNewTodoData((prevData) => ({
-      ...prevData,
-      dueDate: event.target.value,
-    }));
-  };
-
-  const onSaveButtonClickHandler = () => {
+  const onSaveButtonClickHandler = (todo, dueDate, priority) => {
     // console.log("저장합니다.");
     setCachedData((prevData) => [
       ...prevData,
       {
-        id: "todo_" + (prevData.length + 1),
+        id: `todo_${prevData.length + 1}`,
         todo,
         dueDate,
         priority,
         isDone: false,
       },
     ]);
-    setNewTodoData({ todo: "", dueDate: "", priority: 0 });
   };
 
-  const onPrioritySelectChangeHandler = (event) => {
-    // console.log(event.target.value);
-    setNewTodoData((prevData) => ({
-      ...prevData,
-      priority: parseInt(event.target.value),
-    }));
-  };
   // 컴포넌트가 만들어줄 HTML Tag set를 반환
   return (
     <div className="wrapper">
@@ -123,13 +97,7 @@ const TodoMain = () => {
         <TodoHeader onAllDoneChange={isAllDoneChangeHandler} />
         <TodoList todoData={cachedData} onDoneChange={onDoneChangeHandler} />
       </ul>
-      <TodoAppender
-        inputData={{ todo, dueDate, priority }}
-        onDateChange={onDateChangeHandler}
-        onPrioritySelectChange={onPrioritySelectChangeHandler}
-        onSaveButtonClick={onSaveButtonClickHandler}
-        onTaskKeyUp={onTaskKeyUpHandler}
-      />
+      <TodoAppender onSaveButtonClick={onSaveButtonClickHandler} />
     </div>
   );
 };
