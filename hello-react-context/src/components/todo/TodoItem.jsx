@@ -1,22 +1,17 @@
 import { useContext, useRef } from "react";
 import { Confirm } from "../ui/modals";
-import TodoContext from "./contexts/TodoContext";
+import { TodoContext } from "./contexts/TodoContext";
 
-const TodoItem = ({ todo, onDoneChange }) => {
-  const priorities = ["없음", "높음", "보통", "낮음"];
+const TodoItem = ({ id, priorities }) => {
+  // props todo의 이름과 todo.todo의 이름이 같아 객체 구조 분해 불가.
+  // todo.todo의 이름을 todoTask로 변경해 할당.
+  const { getTodo, done } = useContext(TodoContext);
+  const { id: todoId, todo: todoTask, dueDate, priority, isDone } = getTodo(id);
+
   const confirmRef = useRef();
   const checkboxRef = useRef();
 
-  const { componentName } = useContext(TodoContext);
-  console.log("TodoItem: " + componentName);
-  if (!componentName || componentName !== "TodoList") {
-    return <></>;
-  }
-  // props todo의 이름과 todo.todo의 이름이 같아 객체 구조 분해 불가.
-  // todo.todo의 이름을 todoTask로 변경해 할당.
-  const { id, todo: todoTask, dueDate, priority } = todo;
-
-  const doneClass = todo.isDone ? "done" : "";
+  const doneClass = isDone ? "done" : "";
 
   const onDoneChangeHandler = () => {
     if (checkboxRef.current.checked) {
@@ -27,7 +22,8 @@ const TodoItem = ({ todo, onDoneChange }) => {
   };
 
   const onOkClickHandler = () => {
-    onDoneChange(id, !todo.isDone);
+    // onDoneChange(id, !isDone);
+    done(todoId, !checkboxRef.current.checked);
   };
   const onCloseClickHandler = () => {
     checkboxRef.current.checked = !checkboxRef.current.checked;
@@ -41,8 +37,9 @@ const TodoItem = ({ todo, onDoneChange }) => {
         onCloseClick={onCloseClickHandler}
       />
       <input
-        id={id}
+        id={todoId}
         type="checkbox"
+        checked={isDone}
         ref={checkboxRef}
         onChange={onDoneChangeHandler}
       />

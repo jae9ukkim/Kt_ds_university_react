@@ -5,8 +5,7 @@ import ArticleMain from "./components/articles/ArticleMain.jsx";
 import TodoMain from "./components/todo/TodoMain.jsx";
 import Counter from "./components/assignment/Counter.jsx";
 import Calc from "./components/assignment/Calc.jsx";
-import TrendBox from "./components/movieTrend/TrendBox.jsx";
 
 export default function App() {
-  return <TrendBox />;
+  return <TodoMain />;
 }

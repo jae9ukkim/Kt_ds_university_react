@@ -1,16 +1,12 @@
 import { useContext, useRef } from "react";
 import { Confirm } from "../ui/modals";
-import TodoContext from "./contexts/TodoContext";
+import { TodoContext } from "./contexts/TodoContext";
 
-const TodoHeader = ({ onAllDoneChange }) => {
+const TodoHeader = () => {
+  // useContext() 객체 반환. 구조분해해서 필요한 함수만 받아온다
+  const { allDone } = useContext(TodoContext);
   const checkboxRef = useRef();
   const confirmRef = useRef();
-
-  const { componentName } = useContext(TodoContext);
-
-  if (!componentName || componentName !== "TodoGrid") {
-    return <></>;
-  }
 
   const onAllDoneChangeHandler = () => {
     const checked = checkboxRef.current.checked;
@@ -24,7 +20,8 @@ const TodoHeader = ({ onAllDoneChange }) => {
   };
 
   const onConfirmOkClickHandler = () => {
-    onAllDoneChange(checkboxRef.current.checked);
+    // onAllDoneChange(checkboxRef.current.checked);
+    allDone(checkboxRef.current.checked);
   };
 
   const onConfirmCloseClickHandler = () => {

@@ -1,27 +1,24 @@
+import { useContext } from "react";
+import TodoContext from "./contexts/TodoContext";
 import TodoItem, { TodoItemForChildren } from "./TodoItem";
 
-const TodoList = ({ todoData, onDoneChange }) => {
-  const priorities = ["없음", "높음", "보통", "낮음"];
+const TodoList = ({ children }) => {
+  const { componentName } = useContext(TodoContext);
+
+  if (!componentName || componentName !== "TodoGrid") {
+    return <></>;
+  }
+
+  const providerProps = {
+    componentName: "TodoList",
+  };
 
   // todoData가 없다면 데이터가 없다.
   // react는 반환하는 tag가 하나여야 한다.
   return (
-    <>
-      {todoData.map((todo) => (
-        <TodoItem
-          key={todo.id}
-          priorities={priorities}
-          todo={todo}
-          onDoneChange={onDoneChange}
-        />
-        // <TodoItemForChildren>
-        //   <input id={todo.id} type="checkbox" />
-        //   <label htmlFor={todo.id}>{todo.todo}</label>
-        //   <span className="due-date">{todo.dueDate}</span>
-        //   <span className="priority">{priorities[todo.priority]}</span>
-        // </TodoItemForChildren>
-      ))}
-    </>
+    <TodoContext.Provider value={providerProps}>
+      {children}
+    </TodoContext.Provider>
   );
 };
 
