@@ -3,6 +3,7 @@ import { Confirm } from "../ui/modals";
 import TodoContext from "./contexts/TodoContext";
 
 const TodoItem = ({ todo, onDoneChange }) => {
+  console.log("TodoItem");
   const priorities = ["없음", "높음", "보통", "낮음"];
   const confirmRef = useRef();
   const checkboxRef = useRef();
@@ -14,9 +15,9 @@ const TodoItem = ({ todo, onDoneChange }) => {
   }
   // props todo의 이름과 todo.todo의 이름이 같아 객체 구조 분해 불가.
   // todo.todo의 이름을 todoTask로 변경해 할당.
-  const { id, todo: todoTask, dueDate, priority } = todo;
+  const { id, task: todoTask, dueDate, priority } = todo;
 
-  const doneClass = todo.isDone ? "done" : "";
+  const doneClass = todo.done ? "done" : "";
 
   const onDoneChangeHandler = () => {
     if (checkboxRef.current.checked) {
@@ -27,7 +28,7 @@ const TodoItem = ({ todo, onDoneChange }) => {
   };
 
   const onOkClickHandler = () => {
-    onDoneChange(id, !todo.isDone);
+    onDoneChange(id, !todo.done);
   };
   const onCloseClickHandler = () => {
     checkboxRef.current.checked = !checkboxRef.current.checked;
@@ -43,6 +44,7 @@ const TodoItem = ({ todo, onDoneChange }) => {
       <input
         id={id}
         type="checkbox"
+        checked={todo.done}
         ref={checkboxRef}
         onChange={onDoneChangeHandler}
       />
@@ -50,7 +52,7 @@ const TodoItem = ({ todo, onDoneChange }) => {
         {todoTask}
       </label>
       <span className={`due-date ${doneClass}`}>{dueDate}</span>
-      <span className={`priorit ${doneClass}`}>{priorities[priority]}</span>
+      <span className={`priority ${doneClass}`}>{priorities[priority]}</span>
     </li>
   );
 };

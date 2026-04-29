@@ -1,8 +1,10 @@
-import { useRef } from "react";
+import { memo, useRef } from "react";
 import { Alert } from "../ui/modals";
 
 // 함수 props로 받아올 때는 handler 붙이지 않는 것이 관례
-const TodoAppender = ({ onSaveButtonClick }) => {
+const TodoAppender = memo(({ onSaveButtonClick }) => {
+  console.log("TodoAppender");
+
   const refTask = useRef();
   const refDate = useRef();
   const refPriority = useRef();
@@ -49,6 +51,6 @@ const TodoAppender = ({ onSaveButtonClick }) => {
       </button>
     </footer>
   );
-};
+});
 
 export default TodoAppender;

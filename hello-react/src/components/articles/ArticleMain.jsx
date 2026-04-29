@@ -1,16 +1,53 @@
 // articles.json 파일 불러오기
 // articles.json를 불러와서 articleData에 넣겠다
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ArticleHeader from "./ArticleHeader";
 import ArticleList from "./ArticleList";
-import articleData from "./articles.json";
 import ArticleWriter from "./ArticleWriter";
 import ArticleWriter2 from "./ArticleWriter2";
+import { fetchArticleList } from "../../http/articles/fetchArticle";
 
 const ArticleMain = () => {
   // state를 변경
   // 컴포넌트가 재실행. (props의 전달여부 관계 없이)
-  const [articles, setArticleData] = useState(articleData.articles);
+
+  const [viewPageNo, setViewPageNo] = useState(0);
+
+  const onPaginationButtonClickHandler = (nextPageNo) => {
+    setViewPageNo(nextPageNo);
+  };
+
+  const [
+    {
+      count,
+      result: articles,
+      pagination: { pageNo = 0, pageCount = 0 },
+    },
+    setArticleData,
+  ] = useState({
+    count: 0,
+    result: [],
+    pagination: {},
+  });
+
+  const refreshArticlesList = async () => {
+    const articleList = await fetchArticleList(viewPageNo);
+
+    const {
+      result: { count, result },
+      pagination,
+    } = articleList;
+
+    if (!articleList.error) {
+      setArticleData({ count, result, pagination });
+    } else {
+      alert(articleList.error);
+    }
+  };
+
+  useEffect(() => {
+    refreshArticlesList();
+  }, [viewPageNo]);
 
   const onSaveButtonClickHandler = (subject, name, email, content) => {
     setArticleData((prevData) => [
@@ -53,11 +90,27 @@ const ArticleMain = () => {
     ));
   return (
     <div className="wrapper">
-      <div> {articles.length}개의 게시글이 검색되었습니다.</div>
+      <div> {count}개의 게시글이 검색되었습니다.</div>
       <table>
         <ArticleHeader />
         <ArticleList articles={articles} />
       </table>
+      <div>
+        {pageNo > 0 && (
+          <button
+            onClick={onPaginationButtonClickHandler.bind(this, pageNo - 1)}
+          >
+            이전
+          </button>
+        )}
+        {pageCount - 1 > pageNo && (
+          <button
+            onClick={onPaginationButtonClickHandler.bind(this, pageNo + 1)}
+          >
+            다음
+          </button>
+        )}
+      </div>
       <div>{writeForm}</div>
     </div>
   );

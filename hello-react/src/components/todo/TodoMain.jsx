@@ -3,13 +3,20 @@
 // (parameter) => {function body} : fat arrow function
 // const abc = () => {}; // 함수를 만들어서 상수에 넣어라
 
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { StateTest } from "./StateTest";
 import TodoAppender from "./TodoAppender";
 import TodoHeader from "./TodoHeader";
 import TodoList from "./TodoList";
 import TodoItem from "./TodoItem";
 import TodoGrid from "./TodoGrid";
+import AddCalculator from "./AddCalculator";
+import {
+  fetchAddTodo,
+  fetchAllDoneTodo,
+  fetchDoneTodo,
+  fetchTodoList,
+} from "../../http/todo/fetchTodo";
 
 // function과 fat arrow function의 기능적 차이
 // function => 함수를 호출한 대상을 this 객체로 알 수 있다.
@@ -18,85 +25,84 @@ import TodoGrid from "./TodoGrid";
 
 // export default 이후에 const 키워드가 나타날 수 없음(규칙)
 const TodoMain = () => {
+  console.log("TodoMain");
   // const ==> 상수 정의
   // let ==> 변수 정의
   // TODO JSON DATA
-  const todoData = [
-    {
-      id: "todo_1",
-      todo: "React Component Master",
-      dueDate: "2026-04-22",
-      priority: 1,
-      isDone: true,
-    },
-    {
-      id: "todo_2",
-      todo: "React Component Master 2",
-      dueDate: "2026-04-23",
-      priority: 2,
-      isDone: false,
-    },
-    {
-      id: "todo_3",
-      todo: "React Component Master 3",
-      dueDate: "2026-04-24",
-      priority: 3,
-      isDone: false,
-    },
-  ];
 
-  const [cachedData, setCachedData] = useState(todoData);
+  const [cachedData, setCachedData] = useState([]);
 
-  const isAllDoneChangeHandler = (isDone) => {
-    setCachedData((prevData) => {
-      // chachedData를 반복하면서 모든 isDone의 값을 변경한다.
-      // {}가 function의 body가 아니라 객체임을 알리기 위해 ()사용
-      const newData = prevData.map((todo) => ({ ...todo, isDone }));
-      // 변경된 결과를 반환한다.
-      return newData;
-    });
+  const refreshTodoList = async () => {
+    const todoList = await fetchTodoList();
+
+    setCachedData(todoList.body);
+
+    if (todoList.errors) {
+      alert(todoList.errors);
+    }
   };
 
-  // 특정 todo의 isDone 값을 반전시키는 함수
+  useEffect(() => {
+    refreshTodoList();
+  }, []);
+
+  const todoCount = useMemo(() => {
+    return {
+      all: cachedData.length,
+      // 완료된 todo만 찾아 그 개수를 반환. filter의 결과는 새로운 배열
+      done: cachedData.filter((todo) => todo.done).length,
+      // 완료되지 않은 todo만 찾아 그 개수를 반환
+      process: cachedData.filter((todo) => !todo.done).length,
+    };
+  }, [cachedData]);
+
+  const isAllDoneChangeHandler = useCallback(async () => {
+    const fetchResult = await fetchAllDoneTodo();
+    if (!fetchResult.errors) {
+      refreshTodoList();
+    } else {
+      alert(fetchResult.errors);
+    }
+  }, []);
+
+  // 특정 todo의 done 값을 반전시키는 함수
   // 이 함수를 TodoList에게 props로 전달
   // TodoList는 TodoItem에게 함수를 props 전달
-  const onDoneChangeHandler = (todoId, isDone) => {
-    setCachedData((prevData) => {
-      const newStateMemory = [...prevData];
-      // java for each
-      for (const todo of newStateMemory) {
-        if (todo.id === todoId) {
-          todo.isDone = isDone;
-          break;
-        }
+  const onDoneChangeHandler = async (todoId) => {
+    const fetchResult = await fetchDoneTodo(todoId);
+    if (!fetchResult.errors) {
+      refreshTodoList();
+    } else {
+      alert(fetchResult.errors);
+    }
+  };
+
+  const onSaveButtonClickHandler = useCallback(
+    async (todo, dueDate, priority) => {
+      // console.log("저장합니다.");
+      // fetch -> 서버에게 todo를 등록하게 한다.
+      const addResult = fetchAddTodo(todo, dueDate, priority);
+      if (!addResult.errors) {
+        // fetch 완료 이후에 불러오도록.
+        refreshTodoList();
+      } else {
+        alert(addResult.errors);
       }
-      return newStateMemory;
-
-      // console.log(todoId, todoData);
-    });
-  };
-
-  const onSaveButtonClickHandler = (todo, dueDate, priority) => {
-    // console.log("저장합니다.");
-    setCachedData((prevData) => [
-      ...prevData,
-      {
-        id: `todo_${prevData.length + 1}`,
-        todo,
-        dueDate,
-        priority,
-        isDone: false,
-      },
-    ]);
-  };
+    },
+    [],
+  );
 
   // 컴포넌트가 만들어줄 HTML Tag set를 반환
   return (
     <div className="wrapper">
       {/* <StateTest /> */}
+      {/* <AddCalculator /> */}
       <header>React Todo</header>
       <TodoGrid>
-        <TodoHeader onAllDoneChange={isAllDoneChangeHandler} />
+        <TodoHeader
+          count={todoCount}
+          onAllDoneChange={isAllDoneChangeHandler}
+        />
         <TodoList>
           {cachedData.map((todo) => (
             <TodoItem

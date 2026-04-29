@@ -8,5 +8,5 @@ import Calc from "./components/assignment/Calc.jsx";
 import TrendBox from "./components/movieTrend/TrendBox.jsx";
 
 export default function App() {
-  return <TrendBox />;
+  return <ArticleMain />;
 }
