@@ -1,7 +1,7 @@
 export const fetchArticleList = async (pageNo = 0, listSize = 10) => {
   try {
     const fetchResult = await fetch(
-      `http://192.168.211.26:8080/api/articles?pageNo=${pageNo}&listSize=${listSize}`,
+      `http://localhost:8080/api/articles?pageNo=${pageNo}&listSize=${listSize}`,
       {
         method: "get",
       },
@@ -19,7 +19,17 @@ export const fetchArticleList = async (pageNo = 0, listSize = 10) => {
 };
 
 // jwt 받아오기
-export const fetchJsonWebToken = (id, password) => {};
+export const fetchJsonWebToken = async (id, password) => {
+  const loginResult = await fetch("http://localhost:8080/api/authorization", {
+    method: "post",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email: id, password }),
+  });
+  const jwt = await loginResult.json();
+  return jwt;
+};
 
 // 인증 정보 필요.
 export const fetchAddArticle = async () => {

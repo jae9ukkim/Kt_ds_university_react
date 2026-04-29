@@ -1,15 +1,34 @@
 // articles.json 파일 불러오기
 // articles.json를 불러와서 articleData에 넣겠다
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ArticleHeader from "./ArticleHeader";
 import ArticleList from "./ArticleList";
 import ArticleWriter from "./ArticleWriter";
 import ArticleWriter2 from "./ArticleWriter2";
-import { fetchArticleList } from "../../http/articles/fetchArticle";
+import {
+  fetchArticleList,
+  fetchJsonWebToken,
+} from "../../http/articles/fetchArticle";
+import LoginForm from "./LoginForm";
 
 const ArticleMain = () => {
   // state를 변경
   // 컴포넌트가 재실행. (props의 전달여부 관계 없이)
+
+  const [token, setToken] = useState();
+  const id = useRef();
+  const password = useRef();
+
+  const onClickLoginButtonHandler = async () => {
+    const jwt = await fetchJsonWebToken(
+      id.current.value,
+      password.current.value,
+    );
+    setToken(jwt.token);
+    // console.log(jwt);
+    const loginInfo = JSON.parse(atob(jwt.token.split(".")[1]));
+    console.log(loginInfo);
+  };
 
   const [viewPageNo, setViewPageNo] = useState(0);
 
@@ -90,6 +109,28 @@ const ArticleMain = () => {
     ));
   return (
     <div className="wrapper">
+      {!token && (
+        <LoginForm>
+          <div>
+            <div>
+              <label htmlFor="email">ID</label>
+              <input type="text" name="email" id="email" ref={id} />
+            </div>
+            <div>
+              <label htmlFor="password">PWD</label>
+              <input
+                type="password"
+                name="password"
+                id="password"
+                ref={password}
+              />
+            </div>
+            <button type="button" onClick={onClickLoginButtonHandler}>
+              로그인
+            </button>
+          </div>
+        </LoginForm>
+      )}
       <div> {count}개의 게시글이 검색되었습니다.</div>
       <table>
         <ArticleHeader />
