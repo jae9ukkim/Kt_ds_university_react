@@ -6,18 +6,23 @@ import ArticleList from "./ArticleList";
 import ArticleWriter from "./ArticleWriter";
 import ArticleWriter2 from "./ArticleWriter2";
 import {
+  fetchAddArticle,
   fetchArticleList,
   fetchJsonWebToken,
 } from "../../http/articles/fetchArticle";
 import LoginForm from "./LoginForm";
+import { isString } from "../../utils/type";
+import { getValidationResult } from "../../utils/errorHandler";
 
 const ArticleMain = () => {
   // state를 변경
   // 컴포넌트가 재실행. (props의 전달여부 관계 없이)
 
   const [token, setToken] = useState();
+  const [loginErrors, setLoginErrors] = useState();
   const id = useRef();
   const password = useRef();
+  const writerRef = useRef();
 
   const onClickLoginButtonHandler = async () => {
     const jwt = await fetchJsonWebToken(
@@ -25,9 +30,15 @@ const ArticleMain = () => {
       password.current.value,
     );
     setToken(jwt.token);
-    // console.log(jwt);
-    const loginInfo = JSON.parse(atob(jwt.token.split(".")[1]));
-    console.log(loginInfo);
+
+    if (jwt.error) {
+      if (isString(jwt.error)) {
+        setLoginErrors(jwt.error);
+      } else {
+        setLoginErrors(getValidationResult(jwt.error));
+      }
+    }
+    // TODO 로그인 실패 alert 추가하기
   };
 
   const [viewPageNo, setViewPageNo] = useState(0);
@@ -68,22 +79,20 @@ const ArticleMain = () => {
     refreshArticlesList();
   }, [viewPageNo]);
 
-  const onSaveButtonClickHandler = (subject, name, email, content) => {
-    setArticleData((prevData) => [
-      ...prevData,
-      {
-        id: "BO-20260424-00000" + articles.length,
-        subject,
-        content,
-        email,
-        viewCnt: parseInt(Math.random() * 1000),
-        crtDt: "2026-04-24 14:56:51",
-        mdfyDt: "",
-        fileGroupId: "",
-        membersVO: { email, name },
-        files: [],
-      },
-    ]);
+  const onSaveButtonClickHandler = async (subject, content, attachFile) => {
+    const addResult = await fetchAddArticle(
+      token,
+      subject,
+      content,
+      attachFile,
+    );
+
+    if (addResult.error) {
+      // alert(addResult.error);
+      writerRef.current.setResponseError(addResult.error);
+      return;
+    }
+    refreshArticlesList();
   };
 
   // console.log(articleData);
@@ -104,6 +113,7 @@ const ArticleMain = () => {
         <ArticleWriter2
           onClickWriterFormToggle={onClickWriteFormToggleHandler}
           onSaveButtonClick={onSaveButtonClickHandler}
+          errorHandleRef={writerRef}
         />
       </>
     ));
@@ -112,9 +122,11 @@ const ArticleMain = () => {
       {!token && (
         <LoginForm>
           <div>
+            {isString(loginErrors) && <div>{loginErrors}</div>}
             <div>
               <label htmlFor="email">ID</label>
               <input type="text" name="email" id="email" ref={id} />
+              {loginErrors?.email && <div>{loginErrors.email}</div>}
             </div>
             <div>
               <label htmlFor="password">PWD</label>
@@ -124,6 +136,7 @@ const ArticleMain = () => {
                 id="password"
                 ref={password}
               />
+              {loginErrors?.password && <div>{loginErrors.password}</div>}
             </div>
             <button type="button" onClick={onClickLoginButtonHandler}>
               로그인

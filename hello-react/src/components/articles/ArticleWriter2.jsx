@@ -1,11 +1,25 @@
-import { useRef, useState } from "react";
+import { useImperativeHandle, useRef, useState } from "react";
 import { Alert } from "../ui/modals";
+import { isString } from "../../utils/type";
+import { getValidationResult } from "../../utils/errorHandler";
 
-const ArticleWriter2 = ({ onSaveButtonClick }) => {
+const ArticleWriter2 = ({ onSaveButtonClick, errorHandleRef }) => {
+  const [addError, setAddError] = useState();
+  useImperativeHandle(errorHandleRef, () => {
+    return {
+      setResponseError(fetchError) {
+        if (isString(fetchError)) {
+          setAddError(fetchError);
+        } else {
+          setAddError(getValidationResult(fetchError));
+        }
+      },
+    };
+  });
+
   const subjectRef = useRef();
-  const nameRef = useRef();
-  const emailRef = useRef();
   const contentRef = useRef();
+  const attachFileRef = useRef();
   const alertRef = useRef(); // dialog 제어
 
   const [viewMode, setViewMode] = useState("button");
@@ -17,33 +31,21 @@ const ArticleWriter2 = ({ onSaveButtonClick }) => {
       alertRef.current.showModal("제목을 입력해주세요.");
       return;
     }
-    if (!nameRef.current.value) {
-      alertRef.current.showModal("이름을 입력해주세요.");
-      return;
-    }
-    if (!emailRef.current.value) {
-      alertRef.current.showModal("이메일을 입력해주세요.");
-      return;
-    }
     if (!contentRef.current.value) {
       alertRef.current.showModal("내용을 입력해주세요.");
       return;
     }
     console.log("subjectRef", subjectRef.current.value);
-    console.log("nameRef", nameRef.current.value);
-    console.log("emailRef", emailRef.current.value);
     console.log("contentRef", contentRef.current.value);
     onSaveButtonClick(
       subjectRef.current.value,
-      nameRef.current.value,
-      emailRef.current.value,
       contentRef.current.value,
+      attachFileRef.current.files,
     );
     // 초기화
     subjectRef.current.value = "";
-    nameRef.current.value = "";
-    emailRef.current.value = "";
     contentRef.current.value = "";
+    attachFileRef.current.value = "";
   };
 
   const onViewChangeButtonClickHandler = (viewName) => {
@@ -63,17 +65,10 @@ const ArticleWriter2 = ({ onSaveButtonClick }) => {
       {viewMode === "form" && (
         <>
           <Alert dialogRef={alertRef} />
+          {isString(addError) && <div>{addError}</div>}
           <div>
             <label htmlFor="subject">제목</label>
             <input type="text" name="subject" id="subject" ref={subjectRef} />
-          </div>
-          <div>
-            <label htmlFor="email">이메일</label>
-            <input type="email" name="email" id="email" ref={emailRef} />
-          </div>
-          <div>
-            <label htmlFor="name">이름</label>
-            <input type="text" name="name" id="name" ref={nameRef} />
           </div>
           <div>
             <label htmlFor="content">내용</label>
@@ -82,6 +77,15 @@ const ArticleWriter2 = ({ onSaveButtonClick }) => {
               name="content"
               id="content"
               ref={contentRef}
+            />
+          </div>
+          <div>
+            <input
+              type="file"
+              id="file"
+              title="첨부파일"
+              multiple
+              ref={attachFileRef}
             />
           </div>
           <input

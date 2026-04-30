@@ -1,16 +1,23 @@
-import { memo, useRef } from "react";
+import { memo, useRef, useState } from "react";
 import { Alert } from "../ui/modals";
+import { fetchAddTodo, fetchTodoList } from "../../http/todo/fetchTodo";
+import { useDispatch } from "react-redux";
+import { todoAction } from "../../stores/toolkit/slices/todoSlice";
 
 // 함수 props로 받아올 때는 handler 붙이지 않는 것이 관례
-const TodoAppender = memo(({ onSaveButtonClick }) => {
+const TodoAppender = memo(() => {
   console.log("TodoAppender");
+
+  const [isFetching, setIsFetching] = useState(false);
 
   const refTask = useRef();
   const refDate = useRef();
   const refPriority = useRef();
   const todoAlertRef = useRef();
 
-  const onSaveButtonClickHandler = () => {
+  const reactReduxDispatcher = useDispatch();
+
+  const onSaveButtonClickHandler = async () => {
     if (!refTask.current.value) {
       todoAlertRef.current.showModal("Input Task");
       return;
@@ -24,11 +31,22 @@ const TodoAppender = memo(({ onSaveButtonClick }) => {
       return;
     }
 
-    onSaveButtonClick(
+    setIsFetching(true);
+
+    const addResult = await fetchAddTodo(
       refTask.current.value,
       refDate.current.value,
       refPriority.current.value,
     );
+
+    setIsFetching(false);
+
+    if (addResult.errors) {
+      alert(addResult.errors);
+    }
+
+    const fetchResult = await fetchTodoList();
+    reactReduxDispatcher(todoAction.refresh(fetchResult.body));
 
     refTask.current.value = "";
     refDate.current.value = "";
@@ -46,8 +64,12 @@ const TodoAppender = memo(({ onSaveButtonClick }) => {
         <option value="2">보통</option>
         <option value="3">낮음</option>
       </select>
-      <button type="button" onClick={onSaveButtonClickHandler}>
-        Save
+      <button
+        type="button"
+        disabled={isFetching}
+        onClick={onSaveButtonClickHandler}
+      >
+        {isFetching ? "저장중..." : "저장"}
       </button>
     </footer>
   );

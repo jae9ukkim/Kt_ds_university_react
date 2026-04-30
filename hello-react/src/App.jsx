@@ -6,7 +6,13 @@ import TodoMain from "./components/todo/TodoMain.jsx";
 import Counter from "./components/assignment/Counter.jsx";
 import Calc from "./components/assignment/Calc.jsx";
 import TrendBox from "./components/movieTrend/TrendBox.jsx";
+import { ReactReduxProvider } from "./stores/redux/ReactReduxProvider.jsx";
+import { ToolkitProvider } from "./stores/toolkit/ToolkitProvider.jsx";
 
 export default function App() {
-  return <ArticleMain />;
+  return (
+    <ToolkitProvider>
+      <TodoMain />;
+    </ToolkitProvider>
+  );
 }

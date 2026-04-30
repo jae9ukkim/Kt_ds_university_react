@@ -3,7 +3,7 @@
 // (parameter) => {function body} : fat arrow function
 // const abc = () => {}; // 함수를 만들어서 상수에 넣어라
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect } from "react";
 import { StateTest } from "./StateTest";
 import TodoAppender from "./TodoAppender";
 import TodoHeader from "./TodoHeader";
@@ -11,12 +11,9 @@ import TodoList from "./TodoList";
 import TodoItem from "./TodoItem";
 import TodoGrid from "./TodoGrid";
 import AddCalculator from "./AddCalculator";
-import {
-  fetchAddTodo,
-  fetchAllDoneTodo,
-  fetchDoneTodo,
-  fetchTodoList,
-} from "../../http/todo/fetchTodo";
+import { fetchTodoList } from "../../http/todo/fetchTodo";
+import { useDispatch, useSelector } from "react-redux";
+import { todoAction } from "../../stores/toolkit/slices/todoSlice";
 
 // function과 fat arrow function의 기능적 차이
 // function => 함수를 호출한 대상을 this 객체로 알 수 있다.
@@ -30,15 +27,21 @@ const TodoMain = () => {
   // let ==> 변수 정의
   // TODO JSON DATA
 
-  const [cachedData, setCachedData] = useState([]);
+  // const [cachedData, setCachedData] = useState([]);
+  // ReactRedux Store에서 todo state를 가져온다
+  const { list: todoList } = useSelector((store) => store.todo);
+  console.log("TodoList State", todoList);
+  const storeDispatcher = useDispatch();
 
   const refreshTodoList = async () => {
-    const todoList = await fetchTodoList();
+    const fetchResult = await fetchTodoList();
 
-    setCachedData(todoList.body);
+    // setCachedData(todoList.body);
+    // reducer 호출. reducer에 action에 할당.
+    storeDispatcher(todoAction.refresh(fetchResult.body));
 
-    if (todoList.errors) {
-      alert(todoList.errors);
+    if (fetchResult.errors) {
+      alert(fetchResult.errors);
     }
   };
 
@@ -46,70 +49,15 @@ const TodoMain = () => {
     refreshTodoList();
   }, []);
 
-  const todoCount = useMemo(() => {
-    return {
-      all: cachedData.length,
-      // 완료된 todo만 찾아 그 개수를 반환. filter의 결과는 새로운 배열
-      done: cachedData.filter((todo) => todo.done).length,
-      // 완료되지 않은 todo만 찾아 그 개수를 반환
-      process: cachedData.filter((todo) => !todo.done).length,
-    };
-  }, [cachedData]);
-
-  const isAllDoneChangeHandler = useCallback(async () => {
-    const fetchResult = await fetchAllDoneTodo();
-    if (!fetchResult.errors) {
-      refreshTodoList();
-    } else {
-      alert(fetchResult.errors);
-    }
-  }, []);
-
-  // 특정 todo의 done 값을 반전시키는 함수
-  // 이 함수를 TodoList에게 props로 전달
-  // TodoList는 TodoItem에게 함수를 props 전달
-  const onDoneChangeHandler = async (todoId) => {
-    const fetchResult = await fetchDoneTodo(todoId);
-    if (!fetchResult.errors) {
-      refreshTodoList();
-    } else {
-      alert(fetchResult.errors);
-    }
-  };
-
-  const onSaveButtonClickHandler = useCallback(
-    async (todo, dueDate, priority) => {
-      // console.log("저장합니다.");
-      // fetch -> 서버에게 todo를 등록하게 한다.
-      const addResult = fetchAddTodo(todo, dueDate, priority);
-      if (!addResult.errors) {
-        // fetch 완료 이후에 불러오도록.
-        refreshTodoList();
-      } else {
-        alert(addResult.errors);
-      }
-    },
-    [],
-  );
-
   // 컴포넌트가 만들어줄 HTML Tag set를 반환
   return (
     <div className="wrapper">
-      {/* <StateTest /> */}
-      {/* <AddCalculator /> */}
       <header>React Todo</header>
       <TodoGrid>
-        <TodoHeader
-          count={todoCount}
-          onAllDoneChange={isAllDoneChangeHandler}
-        />
+        <TodoHeader />
         <TodoList>
-          {cachedData.map((todo) => (
-            <TodoItem
-              key={todo.id}
-              todo={todo}
-              onDoneChange={onDoneChangeHandler}
-            />
+          {todoList.map((todo) => (
+            <TodoItem key={todo.id} todo={todo} />
             // <TodoItemForChildren>
             //   <input id={todo.id} type="checkbox" />
             //   <label htmlFor={todo.id}>{todo.todo}</label>
@@ -119,7 +67,7 @@ const TodoMain = () => {
           ))}
         </TodoList>
       </TodoGrid>
-      <TodoAppender onSaveButtonClick={onSaveButtonClickHandler} />
+      <TodoAppender />
     </div>
   );
 };
